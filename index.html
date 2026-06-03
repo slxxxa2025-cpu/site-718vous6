@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>راهنات رومي - الحاسبة الذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0b0b0b;
+            font-family: 'Segoe UI', 'Cairo', 'Roboto', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            color: #eaeef2;
+            padding: 20px 16px 32px;
+            line-height: 1.45;
+        }
+
+        /* حاوية رئيسية ناعمة */
+        .app-container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #111214;
+            border-radius: 2rem;
+            padding: 1.2rem 1rem 1.8rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(220, 40, 40, 0.2);
+        }
+
+        /* العنوان */
+        .title {
+            font-size: 1.9rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, #cfcfcf);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        .sub {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #b15353;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px dashed #2a2a2a;
+            display: inline-block;
+            width: auto;
+            padding-bottom: 5px;
+        }
+        .sub span {
+            background: #1e1e1e;
+            padding: 0 8px;
+        }
+
+        /* منطقة الكاميرا */
+        .camera-section {
+            background: #000000;
+            border-radius: 28px;
+            margin-bottom: 1.8rem;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            border: 1px solid #2c2c2c;
+        }
+        .cam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: #0f0f0f;
+        }
+        .cam-header button {
+            background: #ac2c2c;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px black;
+        }
+        .cam-header button:active {
+            transform: scale(0.96);
+            background: #8a2222;
+        }
+        .video-preview {
+            width: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 240px;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 24px;
+            display: block;
+            transform: scaleX(-1); /* مرآة طبيعية للكاميرا الأمامية/خلفية */
+        }
+        .cam-placeholder {
+            color: #aaa;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* لوحة الإضافة السريعة وأزرار الإدخال */
+        .card-panel {
+            background: #1a1c1f;
+            border-radius: 1.5rem;
+            padding: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+        .section-label {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #ec6b6b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 3px solid #c0392b;
+            padding-right: 10px;
+        }
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 90px;
+        }
+        .input-group label {
+            font-size: 0.7rem;
+            color: #bcbcbc;
+            display: block;
+        }
+        select, button.add-btn {
+            background: #2c2f34;
+            border: none;
+            padding: 10px 8px;
+            border-radius: 1rem;
+            color: white;
+            font-weight: 500;
+            width: 100%;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        select {
+            background: #222529;
+            border: 1px solid #3a3e44;
+        }
+        button.add-btn {
+            background: #9e2d2d;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: 0.1s linear;
+        }
+        button.add-btn:active {
+            background: #701f1f;
+        }
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 5px;
+        }
+        .quick-buttons button {
+            background: #292e36;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .quick-buttons button:active {
+            background: #ac4242;
+            color: white;
+        }
+        .cards-list {
+            background: #0e0f12;
+            border-radius: 1.2rem;
+            padding: 10px;
+            max-height: 170px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        .card-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #1f2329;
+            margin: 4px 6px 4px 0;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            gap: 8px;
+            border-left: 2px solid #b34242;
+        }
+        .card-tag button {
+            background: none;
+            border: none;
+            color: #ff8a7a;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .empty-hand {
+            color: #5f5f6e;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+
+        /* زر التحليل الرئيسي */
+        .analyze-btn {
+            width: 100%;
+            background: #b13b3b;
+            border: none;
+            padding: 15px;
+            border-radius: 60px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 1px;
+            margin: 12px 0 18px;
+            box-shadow: 0 5px 0 #631f1f;
+            transition: 0.07s linear;
+            cursor: pointer;
+        }
+        .analyze-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #631f1f;
+        }
+
+        /* نتائج */
+        .results-box {
+            background: #0c0d10;
+            border-radius: 1.4rem;
+            padding: 1rem;
+            margin-top: 8px;
+            border: 1px solid #2c2a2a;
+        }
+        .sequences-list {
+            background: #00000044;
+            padding: 8px;
+            border-radius: 16px;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+        .score-total {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #dc6a6a;
+            margin: 6px 0;
+        }
+        .dead-info {
+            color: #b0a8a8;
+            font-size: 0.8rem;
+        }
+        hr {
+            border-color: #2d2d2d;
+            margin: 10px 0;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #6f6f7a;
+            margin-top: 1.2rem;
+            border-top: 1px solid #232323;
+            padding-top: 1rem;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="title">♢ RAHNEH  ♤</div>
+    <div style="text-align: center; margin-bottom: 0.5rem;"><span class="sub"><span>حاسبة الراهنات المتسلسلة (نفس النوع)</span></span></div>
+
+    <!-- منطقة الكاميرا -->
+    <div class="camera-section">
+        <div class="cam-header">
+            <span>📷 معاينة الكاميرا</span>
+            <button id="openCameraBtn">📸 فتح الكاميرا</button>
+        </div>
+        <div class="video-preview" id="videoContainer">
+            <div class="cam-placeholder" id="camPlaceholder">🔴 الكاميرا غير نشطة<br>اضغط "فتح الكاميرا"</div>
+            <video id="cameraVideo" autoplay playsinline muted style="display: none;"></video>
+        </div>
+    </div>
+
+    <!-- لوحة إدارة الأوراق (محاكاة الفحص الضوئي) -->
+    <div class="card-panel">
+        <div class="section-label">🃏 إضافة أوراق (محاكاة الكشف)</div>
+        <div class="input-row">
+            <div class="input-group">
+                <label>الرتبة / الورقة</label>
+                <select id="rankSelect">
+                    <option value="A">الآص (A)</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option><option value="J">J (ولد)</option><option value="Q">Q (بنت)</option>
+                    <option value="K">K (ملك)</option><option value="Joker">جوكر (JOKER)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>اللون / النوع</label>
+                <select id="suitSelect">
+                    <option value="♥">♥ قلب أحمر</option><option value="♦">♦ ديناري أحمر</option>
+                    <option value="♣">♣ سباتي أسود</option><option value="♠">♠ بستوني أسود</option>
+                </select>
+            </div>
+            <div class="input-group" style="flex: 0.6;">
+                <button id="addCardBtn" class="add-btn">+ إضافة</button>
+            </div>
+        </div>
+        <div class="quick-buttons">
+            <button id="quickSeqHearts">♥ سلسلة نموذجية (A,2,3 ♥)</button>
+            <button id="quickJokerEx">🎭 جوكر + 7,8 ♠</button>
+            <button id="clearAllHand">🗑️ مسح الكل</button>
+        </div>
+        <div class="section-label" style="margin-top: 8px;">📋 أوراق اليد (المُدخلة)</div>
+        <div id="cardsContainer" class="cards-list">
+            <div class="empty-hand">لا توجد أوراق، أضف أوراقاً من الأعلى</div>
+        </div>
+    </div>
+
+    <!-- زر التحليل الرئيسي -->
+    <button id="analyzeBtn" class="analyze-btn">🔍 تحليل الصورة / حساب التوصيلة</button>
+
+    <!-- منطقة النتائج -->
+    <div class="results-box" id="resultsArea">
+        <div style="font-weight:bold;">📊 نتيجة التحليل:</div>
+        <div id="analysisOutput" style="margin-top: 6px;">
+            <span style="color:#9b9b9b;">✧ اضغط زر التحليل لمعرفة الراهنات والنقاط ✧</span>
+        </div>
+    </div>
+    <footer>حقوق التطبيق محفوظة لـ Ali BssaM</footer>
+</div>
+
+<script>
+    // ---------- نظام الحساب (الراهنات المتتالية من نفس النوع فقط) ----------
+    // خريطة القيم العددية الأساسية (للنقاط والترتيب)
+    const rankBaseValue = {
+        'A': 1,   // سيتم التعامل مع A بشكل خاص (منخفض 1 أو عالي 14)
+        '2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,
+        'J':11,'Q':12,'K':13,
+        'Joker': -1  // جوكر
+    };
+    // قيمة النقاط حسب القاعدة (الصور 10 ، الرقمي = قيمته)
+    function getCardPointsByRank(rank, isAceLow=false) {
+        if(rank === 'Joker') return 0; // مؤقت، سيتم حسابها بناءً على الرتبة المستخدمة في السلسلة
+        if(rank === 'A') {
+            if(isAceLow) return 1;   // في سلسلة صغيرة (A,2,3)
+            else return 10;          // سلسلة عليا أو منفصل يُحتسب 10
+        }
+        if(rank === 'J' || rank === 'Q' || rank === 'K') return 10;
+        return parseInt(rank);
+    }
+
+    // تحويل الرتبة لرقم لتحديد التسلسل (1-13 مع استثناء Ace يمكن ان يكون 14)
+    function rankToNumeric(rank, aceAsHigh=false) {
+        if(rank === 'Joker') return -1;
+        if(rank === 'A') return aceAsHigh ? 14 : 1;
+        if(rank === 'J') return 11;
+        if(rank === 'Q') return 12;
+        if(rank === 'K') return 13;
+        return parseInt(rank);
+    }
+
+    // كائن الورقة الأساسي
+    class Card {
+        constructor(rank, suit, id) {
+            this.rank = rank;      // 'A','2'...'Joker'
+            this.suit = suit;      // '♥','♦','♣','♠' , للجوكر يكون suit = 'Joker'
+            this.id = id;
+        }
+        isJoker() { return this.rank === 'Joker'; }
+        getDisplay() {
+            if(this.isJoker()) return "🎭 JOKER";
+            return `${this.rank}${this.suit}`;
+        }
+    }
+
+    let handCards = [];       // مصفوفة الأوراق الحالية
+    let nextCardId = 1;
+    let cameraStream = null;
+    const videoElem = document.getElementById('cameraVideo');
+    const videoContainer = document.getElementById('videoContainer');
+    const camPlaceholder = document.getElementById('camPlaceholder');
+
+    // تحديث عرض الأوراق في الواجهة
+    function renderHand() {
+        const container = document.getElementById('cardsContainer');
+        if(handCards.length === 0) {
+            container.innerHTML = '<div class="empty-hand">📭 لا توجد أوراق، أضف أوراقاً من الأعلى</div>';
+            return;
+        }
+        let html = '';
+        handCards.forEach(card => {
+            let display = card.getDisplay();
+            html += `<div class="card-tag">${display} <button data-id="${card.id}" class="remove-card-btn">✖</button></div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.remove-card-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                handCards = handCards.filter(c => c.id !== id);
+                renderHand();
+            });
+        });
+    }
+
+    function addCard(rank, suit) {
+        if(rank === 'Joker') suit = 'Joker';
+        handCards.push(new Card(rank, suit, nextCardId++));
+        renderHand();
+    }
+
+    // ========== خوارزمية ذكية لاستخراج الراهنات (السياقات المتتالية من نفس النوع) ==========
+    // تُعيد: { runs: [ { cards: [Card], usedJokers: number, assignedRanks: {cardId: numericRankUsed} } ], deadCards: [Card], totalPoints, deadCount }
+    function analyzeSequences(cards) {
+        if(!cards.length) return { runs: [], deadCards: [], totalPoints: 0, deadCount: 0, runDetails: [] };
+        // نسخ الأوراق وجوكرات منفصلة
+        let normalCards = cards.filter(c => !c.isJoker());
+        let jokersPool = cards.filter(c => c.isJoker()).length;
+        // تجميع حسب النوع (suit) للأوراق العادية
+        let cardsBySuit = new Map(); // suit -> [Card]
+        for(let card of normalCards) {
+            if(!cardsBySuit.has(card.suit)) cardsBySuit.set(card.suit, []);
+            cardsBySuit.get(card.suit).push(card);
+        }
+        // سجل الأوراق المستخدمة (id) والجوكرات المستهلكة، مع تخزين الرتب المستخدمة للنقاط
+        let usedCardIds = new Set();
+        let usedJokers = 0;
+        let runsInfo = []; // { cards: [Card], assignedRanks: Map<cardId, numericUsedRank>, jokersCount: number }
+
+        // دالة مساعدة: إيجاد أطول سلسلة ممكنة ضمن مجموعة أوراق من نفس اللون + جوكرات متاحة
+        // تعيد: { bestCards, assignedRanksMap, jokersNeeded, lengthSequence, ranksUsedArray } أو null
+        function findBestRunInGroup(suitCards, availableJokers) {
+            if(suitCards.length === 0 && availableJokers === 0) return null;
+            // تحضير قائمة بالأوراق وتمثيلها المرن (للآص نعطيه خيارين محتملين: 1 و14)
+            let cardsWithOptions = [];
+            for(let card of suitCards) {
+                if(card.rank === 'A') {
+                    cardsWithOptions.push({ card, possibleRanks: [1, 14] });
+                } else {
+                    let num = rankToNumeric(card.rank, false);
+                    cardsWithOptions.push({ card, possibleRanks: [num] });
+                }
+            }
+            let bestRun = null; // { cards, ranksMap, jokersUsed, length }
+            // نبحث عن أفضل سلسلة (أطول طول) عبر كل نقطة بداية محتملة (1-14)
+            for(let startRank = 1; startRank <= 14; startRank++) {
+                for(let len = 14-startRank+1; len >= 3; len--) { // نفضل الطويلة
+                    if(bestRun && bestRun.length >= len) break;
+                    let neededRanks = [];
+                    for(let i=0; i<len; i++) neededRanks.push(startRank + i);
+                    // نحاول مطابقة neededRanks باستخدام البطاقات + الجوكرات
+                    let usedCardsTemp = [];
+                    let usedRanksMap = new Map(); // card id -> rank assigned
+                    let jokersUsedTemp = 0;
+                    let remainingJokers = availableJokers;
+                    let matched = true;
+                    let remainingOptions = [...cardsWithOptions];
+                    for(let needRank of neededRanks) {
+                        // ابحث عن بطاقة يمكن أن تأخذ هذا الرقم
+                        let foundIdx = -1;
+                        for(let idx=0; idx<remainingOptions.length; idx++) {
+                            const opt = remainingOptions[idx];
+                            if(opt.possibleRanks.includes(needRank)) {
+                                foundIdx = idx;
+                                break;
+                            }
+                        }
+                        if(foundIdx !== -1) {
+                            let match = remainingOptions[foundIdx];
+                            usedCardsTemp.push(match.card);
+                            usedRanksMap.set(match.card.id, needRank);
+                            remainingOptions.splice(foundIdx,1);
+                        } else if(remainingJokers > 0) {
+                            jokersUsedTemp++;
+                            remainingJokers--;
+                        } else {
+                            matched = false;
+                            break;
+                        }
+                    }
+                    if(matched && usedCardsTemp.length + jokersUsedTemp === len && len>=3) {
+                        if(!bestRun || len > bestRun.length) {
+                            bestRun = {
+                                cards: usedCardsTemp,
+                                ranksMap: usedRanksMap,
+                                jokersUsed: jokersUsedTemp,
+                                length: len
+                            };
+                        }
+                    }
+                }
+            }
+            return bestRun;
+        }
+
+        // نكرر استخراج أفضل سلسلة من كل مجموعة بشكل متكرر (جشع لأطول سلسلة)
+        let globalJokers = jokersPool;
+        // نعمل نسخة متغيرة من البطاقات حسب المجموعات
+        let remainingBySuit = new Map();
+        for(let [suit, arr] of cardsBySuit.entries()) {
+            remainingBySuit.set(suit, [...arr]);
+        }
+        let stopLoop = false;
+        while(!stopLoop) {
+            let bestGlobalRun = null;
+            let bestSuit = null;
+            for(let [suit, suitCardList] of remainingBySuit.entries()) {
+                if(suitCardList.length === 0 && globalJokers === 0) continue;
+                let run = findBestRunInGroup(suitCardList, globalJokers);
+                if(run && (!bestGlobalRun || run.length > bestGlobalRun.length)) {
+                    bestGlobalRun = run;
+                    bestSuit = suit;
+                }
+            }
+            if(!bestGlobalRun || bestGlobalRun.length < 3) break;
+            // إزالة البطاقات المستخدمة من المجموعة والجوكرات
+            const runCards = bestGlobalRun.cards;
+            for(let card of runCards) {
+                let suitList = remainingBySuit.get(card.suit);
+                if(suitList) {
+                    let idx = suitList.findIndex(c => c.id === card.id);
+                    if(idx !== -1) suitList.splice(idx,1);
+                }
+                usedCardIds.add(card.id);
+            }
+            globalJokers -= bestGlobalRun.jokersUsed;
+            usedJokers += bestGlobalRun.jokersUsed;
+            // حفظ معلومات الراهنة
+            runsInfo.push({
+                cards: runCards,
+                jokersCount: bestGlobalRun.jokersUsed,
+                assignedRanks: bestGlobalRun.ranksMap,
+                suit: bestSuit
+            });
+            if(globalJokers < 0) globalJokers = 0;
+            // شرط الخروج إذا لم يعد يوجد ما يكفي
+            let anyCardsLeft = Array.from(remainingBySuit.values()).some(arr => arr.length > 0);
+            if(!anyCardsLeft && globalJokers === 0) break;
+            if(!bestGlobalRun) break;
+        }
+
+        // الأوراق الميتة: البطاقات العادية غير المستخدمة + الجوكرات المتبقية
+        let deadCardsList = [];
+        for(let card of normalCards) {
+            if(!usedCardIds.has(card.id)) deadCardsList.push(card);
+        }
+        for(let i=0; i<globalJokers; i++) {
+            deadCardsList.push(new Card('Joker', 'Joker', -1 - i));
+        }
+        // احتساب مجموع النقاط للراهنات فقط
+        let totalPoints = 0;
+        let runDetailsText = [];
+        for(let run of runsInfo) {
+            let runCardsList = run.cards;
+            let assigned = run.assignedRanks;
+            let runPoints = 0;
+            let runDisplay = [];
+            for(let card of runCardsList) {
+                let usedRankVal = assigned.get(card.id);
+                let pointVal = 0;
+                if(card.rank === 'A') {
+                    let isLow = (usedRankVal === 1);
+                    pointVal = getCardPointsByRank('A', isLow);
+                } else if(card.rank === 'J' || card.rank === 'Q' || card.rank === 'K') {
+                    pointVal = 10;
+                } else {
+                    pointVal = usedRankVal; // 2-10
+                }
+                runPoints += pointVal;
+                let rankSym = card.rank;
+                if(card.rank === 'A') rankSym = usedRankVal === 1 ? 'A(1)' : 'A(10)';
+                runDisplay.push(`${card.rank}${card.suit}`);
+            }
+            for(let j=0; j<run.jokersCount; j++) {
+                runDisplay.push('🎭جوكر');
+                // تقدير نقاط الجوكر بناءً على الرتبة التي عوضها في السلسلة (لكن ليس لدينا تفصيل لكل جوكر)
+                // طريقة سهلة: لحساب نقاط الجوكر نبحث عن الرتبة المفقودة ضمن السلسلة المثالية. نقوم بإضافة قيمة تقديرية من الرتبة المفقودة
+                // بسبب تعقيد تحديد الجوكر، نعتمد أن الجوكر يأخذ نقطة متوسطة بناءً على الرتبة التي حل محلها (نبحث في السياق)
+                // لكن لدينا bestGlobalRun كان لديه ranksMap لا يشمل الجوكر مباشرة. لكن من اجل الدقة سنقدر: لكل جوكر نقوم بحساب متوسط الرتب المفقودة
+                // من أجل البساطة والالتزام بالقوانين: الجوكر في السلسلة نقطته = قيمة الرتبة التي حل محلها (مأخوذ من الرتب المجاورة)
+                // الحل: نستنتج الرتب المفقودة عبر مقارنة السلسلة الكاملة بالبطاقات الموجودة (سنضيف بسيط)
+            }
+            // معالجة الجوكر داخل الراهنة: نحن نعرف عدد الجوكر، ونقدر كل جوكر بأقصى قيمة موجودة غير مستخدمة؟ لكن الأفضل
+            // عمل إضافة للنقاط الجوكر من منطق الرتبة المفقودة. سنحسب نقاط الجوكر بناءً على أوضح رتبة ضائعة في السلسلة الفعلية:
+            // بالطريقة المبسطة نقوم بإعادة حساب النقاط لاحقا لكل run.
+            // بما اننا نملك bestGlobalRun ليس فيه جوكر داخل ranksMap. نقوم بتصحيح بسيط: إعادة احتساب نقاط الجوكر بعد معرفة السلسلة الكاملة
+            // سأقوم بإضافة تصحيح: حساب النقاط الكاملة للسلسلة بما فيها الجوكرات بالاعتماد على متوسط الرتب في الفجوات.
+            // ولكن لضمان الدقة وسهولة التنفيذ، سأقوم بحساب النقاط بطريقة بديلة: تجميع قيم البطاقات و الجوكر يعادل قيمة الرتبة الناقصة التي يحددها السياق.
+            // سنحسب لكل جوكر قيمة الرتبة المفقودة بالاستناد إلى أقرب رتبتين.
+        }
+        // إعادة حساب النقاط بشكل أدق للسلسلة (مع الجوكر)
+        let refinedPoints = 0;
+        let finalRunsDisplay = [];
+        for(let run of runsInfo) {
+            let cardsInRun = run.cards;
+            let jokersCount = run.jokersCount;
+            let suit = run.suit;
+            // استخرج جميع الرتب الفعلية المستخدمة في البطاقات (معرفة)
+            let usedRanks = [];
+            for(let card of cardsInRun) {
+                let rVal = run.assignedRanks.get(card.id);
+                usedRanks.push(rVal);
+            }
+            // نحتاج إلى بناء السلسلة الكاملة (مع الجوكر) نعرف طول السلسلة = usedRanks.length + jokersCount
+            // الحصول على الحد الأدنى والحد الأقصى لتشكيل تسلسل صحيح
+            let sorted = [...usedRanks].sort((a,b)=>a-b);
+            let minRank = sorted[0];
+            let maxRank = sorted[sorted.length-1];
+            let expectedLen = maxRank - minRank + 1;
+            let totalLen = cardsInRun.length + jokersCount;
+            if(totalLen !== expectedLen) {
+                // قد يكون هناك جوكر يمثل أكتر من فجوة ولكن خوارزميتنا تضمن التطابق
+            }
+            let pointsRun = 0;
+            // نقاط البطاقات الموجودة (دون جوكر)
+            for(let card of cardsInRun) {
+                let assignedVal = run.assignedRanks.get(card.id);
+                if(card.rank === 'A') {
+                    pointsRun += (assignedVal === 1 ? 1 : 10);
+                } else if(card.rank === 'J' || card.rank === 'Q' || card.rank === 'K') {
+                    pointsRun += 10;
+                } else {
+                    pointsRun += assignedVal;
+                }
+            }
+            // نقاط الجوكرات: لكل جوكر نبحث عن الرتبة المفقودة في السلسلة الكاملة
+            let missingRanks = [];
+            for(let r = minRank; r <= maxRank; r++) {
+                if(!usedRanks.includes(r)) missingRanks.push(r);
+            }
+            for(let i=0; i<jokersCount && i<missingRanks.length; i++) {
+                let missVal = missingRanks[i];
+                let pointForJoker = (missVal === 1 ? 1 : (missVal === 14 ? 10 : (missVal>=11 && missVal<=13 ? 10 : missVal)));
+                pointsRun += pointForJoker;
+            }
+            refinedPoints += pointsRun;
+            let displaySeq = cardsInRun.map(c=>`${c.rank}${c.suit}`).join(', ');
+            if(jokersCount>0) displaySeq += ` + ${jokersCount} جوكر`;
+            finalRunsDisplay.push(`[ ${displaySeq} ] → ${pointsRun} نقطة`);
+        }
+        totalPoints = refinedPoints;
+        let deadCount = deadCardsList.length;
+        return {
+            runs: runsInfo,
+            deadCards: deadCardsList,
+            totalPoints: totalPoints,
+            deadCount: deadCount,
+            runDetails: finalRunsDisplay
+        };
+    }
+
+    function performAnalysis() {
+        if(handCards.length === 0) {
+            document.getElementById('analysisOutput').innerHTML = `<span style="color:#c97a7a;">⚠️ لا توجد أوراق في اليد. أضف أوراقاً أولاً.</span>`;
+            return;
+        }
+        const result = analyzeSequences(handCards);
+        let outputHtml = '';
+        if(result.runs.length === 0) {
+            outputHtml += `<div class="sequences-list">❌ لم يتم اكتشاف أي راهمة متتالية (3 أوراق فأكثر بنفس اللون)</div>`;
+        } else {
+            outputHtml += `<div class="sequences-list"><strong>🏆 الراهمات المكتشفة بنجاح:</strong><br>${result.runDetails.map(r=>`▪️ ${r}`).join('<br>')}</div>`;
+        }
+        outputHtml += `<div class="score-total">🧮 مجموع نقاط التوصيلة: ${result.totalPoints} نقطة</div>`;
+        outputHtml += `<div class="dead-info">🃟 عدد الأوراق الميتة (المستبعَدة): ${result.deadCount}</div>`;
+        if(result.deadCards.length>0) {
+            let deadNames = result.deadCards.slice(0,8).map(c=>c.getDisplay()).join(', ');
+            outputHtml += `<div class="dead-info" style="font-size:0.7rem;">🪦 الأوراق الميتة: ${deadNames}</div>`;
+        }
+        document.getElementById('analysisOutput').innerHTML = outputHtml;
+    }
+
+    // كاميرا
+    async function startCamera() {
+        if(cameraStream) {
+            stopCamera();
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
+            cameraStream = stream;
+            videoElem.srcObject = stream;
+            videoElem.style.display = "block";
+            camPlaceholder.style.display = "none";
+            videoElem.play().catch(e=>console.warn);
+        } catch(err) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraStream = stream;
+                videoElem.srcObject = stream;
+                videoElem.style.display = "block";
+                camPlaceholder.style.display = "none";
+            } catch(e) {
+                camPlaceholder.innerHTML = "❌ لا يمكن الوصول للكاميرا <br> امنح الإذن أو استخدم الإضافة اليدوية";
+                camPlaceholder.style.display = "flex";
+                videoElem.style.display = "none";
+            }
+        }
+    }
+    function stopCamera() {
+        if(cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        videoElem.style.display = "none";
+        camPlaceholder.style.display = "flex";
+        camPlaceholder.innerHTML = "📷 الكاميرا متوقفة<br>اضغط فتح الكاميرا";
+    }
+    document.getElementById('openCameraBtn').addEventListener('click', startCamera);
+
+    // اضافة بطاقة
+    document.getElementById('addCardBtn').addEventListener('click', () => {
+        const rank = document.getElementById('rankSelect').value;
+        let suit = document.getElementById('suitSelect').value;
+        if(rank === 'Joker') suit = 'Joker';
+        addCard(rank, suit);
+    });
+    document.getElementById('quickSeqHearts').addEventListener('click', () => {
+        addCard('A','♥'); addCard('2','♥'); addCard('3','♥');
+    });
+    document.getElementById('quickJokerEx').addEventListener('click', () => {
+        addCard('7','♠'); addCard('8','♠'); addCard('Joker','Joker');
+    });
+    document.getElementById('clearAllHand').addEventListener('click', () => {
+        handCards = [];
+        renderHand();
+    });
+    document.getElementById('analyzeBtn').addEventListener('click', performAnalysis);
+
+    renderHand();
+</script>
+</body>
+</html>
